@@ -4,21 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-<title>Vitality</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F2F7">
+<title>Vitality pillar</title>
 <style>
   :root {
-    --bg: #000000;
-    --card: #1C1C1E;
-    --separator: rgba(84, 84, 88, 0.34);
-    --text: #FFFFFF;
-    --text-secondary: #EBEBF5;
-    --text-tertiary: rgba(235, 235, 245, 0.6);
-    --text-quaternary: rgba(235, 235, 245, 0.3);
-    --green: #30D158;
-    --green-dim: rgba(48, 209, 88, 0.16);
-    --header-blur: rgba(0, 0, 0, 0.72);
+    --bg: #F2F2F7;
+    --card: #FFFFFF;
+    --separator: rgba(60, 60, 67, 0.29);
+    --text: #000000;
+    --text-secondary: rgba(60, 60, 67, 0.9);
+    --text-tertiary: rgba(60, 60, 67, 0.6);
+    --text-quaternary: rgba(60, 60, 67, 0.3);
+    --green: #34C759;
+    --green-dim: rgba(52, 199, 89, 0.16);
+    --teal: #30B0C7;
+    --orange: #FF9500;
+    --header-blur: rgba(242, 242, 247, 0.82);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -50,7 +52,7 @@
     background: var(--header-blur);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
-    padding: 14px 20px 16px;
+    padding: 14px 20px 14px;
     border-bottom: 0.5px solid var(--separator);
   }
   .title-row {
@@ -73,41 +75,73 @@
     margin-top: 2px;
     letter-spacing: -0.08px;
   }
-  .ring-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
-  .ring-svg { transform: rotate(-90deg); display: block; }
-  .ring-bg { fill: none; stroke: var(--green-dim); stroke-width: 6; }
-  .ring-fg {
-    fill: none;
-    stroke: var(--green);
-    stroke-width: 6;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .ring-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  /* Bottom tab bar — always on top */
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background: transparent;
+    padding: 14px 20px calc(18px + env(safe-area-inset-bottom));
     pointer-events: none;
   }
-  .ring-pts {
-    font-size: 14px;
-    font-weight: 700;
+  .tabbar .seg {
+    max-width: 340px;
+    margin: 0 auto;
+    pointer-events: auto;
+  }
+  /* ── Liquid-glass segmented control ── */
+  .seg {
+    display: flex;
+    position: relative;
+    border-radius: 999px;
+    padding: 5px;
+    background: rgba(190, 190, 195, 0.18);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 0.5px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.22),
+      inset 0 1px 1px rgba(255, 255, 255, 0.6),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.08);
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
     color: var(--text);
-    line-height: 1;
-    transition: color 0.3s ease;
-  }
-  .ring-pts.complete { color: var(--green); }
-  .ring-goal {
-    font-size: 9px;
+    font-family: ui-rounded, -apple-system, "SF Pro Rounded", system-ui, sans-serif;
+    font-size: 16px;
     font-weight: 600;
-    color: var(--text-tertiary);
-    margin-top: 2px;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
+    padding: 13px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    z-index: 1;
+    transition: color 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
   }
-  .content { padding: 18px 20px 80px; }
+  .seg-btn.active { color: #007AFF; }
+  .seg-thumb {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 5px;
+    width: calc(50% - 5px);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+    backdrop-filter: saturate(200%) blur(14px) brightness(1.12);
+    -webkit-backdrop-filter: saturate(200%) blur(14px) brightness(1.12);
+    border: 0.5px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      0 2px 10px rgba(0, 0, 0, 0.18),
+      inset 0 1px 2px rgba(255, 255, 255, 0.85),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.06);
+    transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .seg-thumb.w2 { transform: translateX(100%); }
+  .content { padding: 18px 20px calc(108px + env(safe-area-inset-bottom)); }
   .group { background: var(--card); border-radius: 13px; overflow: hidden; }
   .day-row {
     display: flex;
@@ -147,10 +181,8 @@
     transform: scale(0.4);
     transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .tick.checked {
-    background: var(--green);
-    border-color: var(--green);
-  }
+  .tick.checked { background: var(--green); border-color: var(--green); }
+  .tick.checked.rest { background: var(--teal); border-color: var(--teal); }
   .tick.checked svg { opacity: 1; transform: scale(1); }
   .tick:active { transform: scale(0.88); }
   .day-info {
@@ -179,6 +211,8 @@
     color: var(--text);
     letter-spacing: -0.32px;
   }
+  .day-title.rest { color: var(--text); }
+  .day-title.event { color: var(--text); }
   .day-sub {
     font-size: 13px;
     color: var(--text-tertiary);
@@ -191,15 +225,6 @@
     cursor: pointer;
     padding: 4px 0 4px 8px;
   }
-  .day-points {
-    font-family: ui-rounded, -apple-system, system-ui, sans-serif;
-    font-variant-numeric: tabular-nums;
-    font-size: 15px;
-    color: var(--text-tertiary);
-    font-weight: 500;
-    transition: color 0.25s ease;
-  }
-  .day-points.earned { color: var(--green); font-weight: 600; }
   .chevron {
     color: var(--text-quaternary);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -212,10 +237,7 @@
     opacity: 0;
     transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
   }
-  .day-row.expanded + .detail-wrap {
-    max-height: 3000px;
-    opacity: 1;
-  }
+  .day-row.expanded + .detail-wrap { max-height: 4000px; opacity: 1; }
   .detail-inner {
     padding: 4px 16px 14px;
     background: var(--card);
@@ -227,7 +249,7 @@
     color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    margin: 12px 4px 6px;
+    margin: 14px 4px 6px;
   }
   .ex {
     display: flex;
@@ -272,7 +294,7 @@
     font-family: ui-rounded, -apple-system, system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
     font-size: 13px;
-    color: var(--green);
+    color: var(--text);
     font-weight: 600;
     white-space: nowrap;
     padding-top: 2px;
@@ -285,8 +307,9 @@
     color: var(--text-secondary);
     line-height: 1.42;
     letter-spacing: -0.08px;
-    margin-top: 4px;
+    margin-top: 6px;
   }
+  .info-pill strong { color: var(--text); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -294,133 +317,194 @@
   <header>
     <div class="title-row">
       <div>
-        <h1>Vitality</h1>
-        <div class="week-label">Sat 16 – Fri 22 May</div>
-      </div>
-      <div class="ring-container" role="progressbar" aria-label="Weekly points">
-        <svg class="ring-svg" width="60" height="60" viewBox="0 0 60 60">
-          <circle class="ring-bg" cx="30" cy="30" r="25"/>
-          <circle class="ring-fg" id="ringFg" cx="30" cy="30" r="25"
-                  stroke-dasharray="157.08" stroke-dashoffset="157.08"/>
-        </svg>
-        <div class="ring-label">
-          <div class="ring-pts rounded" id="ringPts">0</div>
-          <div class="ring-goal rounded">/ 900</div>
-        </div>
+        <h1>Vitality pillar</h1>
+        <div class="week-label" id="weekLabel"></div>
       </div>
     </div>
   </header>
   <main class="content" id="content"></main>
+  <nav class="tabbar">
+    <div class="seg">
+      <div class="seg-thumb" id="segThumb"></div>
+      <button class="seg-btn active" data-week="1">Parkrun</button>
+      <button class="seg-btn" data-week="2">Fives</button>
+    </div>
+  </nav>
 </div>
-
 <script>
 const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const CHEVRON_SVG = '<svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L6.5 6.5L1 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+// ── Session definitions ─────────────────────────────────────────────
+const WEEKDAY_RULE = "3 heavy working sets per exercise · 2 min rest · in and out, no extras.";
+
 const sessions = {
-  push: { title: "Push", sub: "Upper chest + traps", exercises: [
-    { name: "Incline DB press", scheme: "4 × 6–8", note: "Top set tracked" },
-    { name: "Flat machine chest press", scheme: "3 × 8–10" },
-    { name: "Machine shoulder press", scheme: "3 × 8–10" },
-    { name: "Cable low-to-high fly", scheme: "3 × 12–15", note: "Upper chest secondary" },
-    { name: "DB shrug, 2s pause at top", scheme: "3 × 12–15" },
-    { name: "Triceps pushdown", scheme: "3 × 10–12" }
+  push: { title: "Push", sub: "Chest, shoulders, triceps", rule: WEEKDAY_RULE, exercises: [
+    { name: "Machine chest press", scheme: "3 × 6–10" },
+    { name: "Machine shoulder press", scheme: "3 × 6–10" },
+    { name: "Lateral raise", scheme: "3 × 12–15" },
+    { name: "Reverse pec-deck", scheme: "3 × 12–15", note: "Rear delt" },
+    { name: "Triceps pushdown", scheme: "3 × 8–12" }
   ]},
-  pull: { title: "Pull", sub: "Back thickness + traps", exercises: [
-    { name: "Pull-up", scheme: "4 × AMRAP", note: "Total reps tracked" },
-    { name: "Machine low row", scheme: "4 × 8–10" },
-    { name: "Lat pulldown, close neutral", scheme: "3 × 8–10" },
-    { name: "Face pull", scheme: "3 × 15" },
-    { name: "Rear delt fly machine", scheme: "3 × 12–15" },
-    { name: "DB shrug", scheme: "3 × 12–15" },
-    { name: "Hammer curl", scheme: "3 × 10–12" }
+  pull: { title: "Pull", sub: "Back, biceps, rear delt", rule: WEEKDAY_RULE, exercises: [
+    { name: "Weighted pull-up / lat pulldown", scheme: "3 × 6–10" },
+    { name: "Machine low row", scheme: "3 × 8–12", note: "Chest-supported" },
+    { name: "Cable pullover / 2nd vertical pull", scheme: "3 × 10–12" },
+    { name: "Biceps curl", scheme: "3 × 8–12" },
+    { name: "Face pull", scheme: "3 × 15" }
+  ], info: "Optional short L-sit / front-lever tuck block first if time allows. Flow: grid room (bar, mat) → parallel bars → cable area." },
+  legs_full: { title: "Legs", sub: "Full session · after easy parkrun", exercises: [
+    { name: "Leg press", scheme: "3 × 6–10", note: "Heavy, plus 1–2 ramp sets" },
+    { name: "Seated hamstring curl", scheme: "3 × 8–12" },
+    { name: "Glute kickback machine", scheme: "3 × 10–12" },
+    { name: "Calf raise", scheme: "3–4 × 10–15" },
+    { name: "Leg extension", scheme: "Conditional", note: "Only if back pain-free: light, partial ROM. Else skip." }
+  ], info: "Finish with hip and ankle mobility." },
+  legs_eff: { title: "Legs", sub: "Efficient session", rule: WEEKDAY_RULE, exercises: [
+    { name: "Leg press", scheme: "3 × 6–10", note: "Heavy" },
+    { name: "Seated hamstring curl", scheme: "3 × 8–12" },
+    { name: "Glute kickback machine", scheme: "3 × 10–12" },
+    { name: "Calf raise", scheme: "3 × 10–15" }
   ]},
-  legs: { title: "Legs", sub: "Aesthetic + glutes", exercises: [
-    { name: "Leg press", scheme: "4 × 8–10", note: "Top set tracked" },
-    { name: "Bulgarian split squat", scheme: "3 × 8–10/leg" },
-    { name: "Seated hamstring curl", scheme: "4 × 10–12" },
-    { name: "Walking lunges", scheme: "3 × 10/leg" },
-    { name: "Machine hip thrust", scheme: "3 × 10–12" },
-    { name: "Standing calf raise", scheme: "4 × 12–15" }
-  ]},
-  core: { title: "Core", sub: "Lower core + hips", exercises: [
-    { name: "Hanging leg raise", scheme: "4 × 8–12", note: "Knee → straight progression" },
-    { name: "Hanging L-sit hold", scheme: "5 × max", note: "Target 30s working" },
-    { name: "Pallof press", scheme: "3 × 10/side" },
-    { name: "Cable woodchop, low-to-high", scheme: "3 × 10/side" },
-    { name: "Dead bug, slow tempo", scheme: "3 × 10/side" },
-    { name: "McGill big 3", scheme: "1 round", note: "Curl-up, side plank, bird-dog" },
-    { name: "Hip flow", scheme: "10 min", note: "90/90, frog, couch stretch" }
-  ]},
-  skill: { title: "Skill", sub: "Calisthenics", exercises: [
-    { name: "Wrist + shoulder prep", scheme: "5 min" },
-    { name: "Handstand practice", scheme: "15 min", note: "Wall → kick-ups → freestanding" },
-    { name: "Muscle-up", scheme: "5 × 1–3", note: "Clean reps, paused transition" },
-    { name: "Front lever progression", scheme: "5 × 10–15s", note: "Tuck → adv tuck → straddle" },
-    { name: "Hanging L-sit", scheme: "5 × max" },
-    { name: "Mobility cool-down", scheme: "10 min" }
-  ]},
-  cardio_run: { title: "Run", sub: "30 min @ 80% HR",
-    info: "No gym. Pure cardio session — treadmill or outdoor." },
-  swim: { title: "Swim", sub: "30 min @ 70% HR",
-    info: "Pure swim (200 pts) OR after gym visit (gym 100 pts is highest, swim ignored). Either path keeps the week above 900." }
+  cardio_core: { title: "Cardio + Core", sub: "Zone 2 + lower core", exercises: [
+    { name: "Hanging leg raise", scheme: "3 sets" },
+    { name: "L-sit progression", scheme: "3 sets" },
+    { name: "Pallof press", scheme: "3 sets" },
+    { name: "Hollow hold", scheme: "3 sets" }
+  ], info: "<strong>Cardio:</strong> 25–35 min steady Zone 2 — bike, swim, or treadmill. Alternate modality between the two Cardio+Core sessions across the cycle." },
+  parkrun: { title: "Parkrun", sub: "Easy effort, then full Legs", event: true,
+    info: "Run easy — this is the warm-up for legs, not a PB attempt. Legs session follows (see below). Legs cannot precede parkrun, so this order is fixed." },
+  fives: { title: "Fives", sub: "Football", event: true,
+    info: "Legs kept clear for 3 days before (Thu legs → Sun fives) to protect freshness. If fives feels compromised by Thu legs, fallback is moving legs to Mon Wk2." },
+  rest_mob: { title: "Rest / mobility", sub: "Mobility 15–25 min + easy walk", rest: true,
+    info: "Mobility 15–25 min, easy walk. Handstand wall holds optional, low load. See grid-room mobility list below." },
+  rest_recovery: { title: "Rest + recovery", sub: "Recovery stack day", rest: true,
+    info: "<strong>Recovery stack, in order:</strong> foam roll → stretch → spa bath → cold plunge. Only on full rest/recovery days, never after a heavy training day." }
 };
 
-const dailyMobility = [
-  { name: "Cat-cow", scheme: "× 10" },
-  { name: "Thoracic rotations", scheme: "× 10/side" },
-  { name: "90/90 hip switches", scheme: "× 10" },
-  { name: "Frog stretch", scheme: "60s" },
-  { name: "Couch stretch", scheme: "60s/side" },
-  { name: "Knee-to-wall dorsiflexion", scheme: "× 10/side" },
-  { name: "Hip CARs", scheme: "× 5/side" },
-  { name: "Band shoulder dislocations", scheme: "× 10" }
-];
+// ── Grid-room mobility list (shown on rest/mobility days) ────────────
+const gridMobility = {
+  "Shoulder / scapular": [
+    { name: "Dead hang, passive", scheme: "3 × 30–45s" },
+    { name: "Scapular pull-ups on bar", scheme: "3 × 10" },
+    { name: "Shoulder CARs, standing", scheme: "2 × 5/arm" },
+    { name: "Arm circles, slow", scheme: "2 × 10" },
+    { name: "Hanging scap shrugs → active hang", scheme: "2 × 8" }
+  ],
+  "Hip": [
+    { name: "90/90 hip switches", scheme: "3 × 8/side" },
+    { name: "World's greatest stretch", scheme: "2 × 5/side" },
+    { name: "Deep squat hold (ATG)", scheme: "3 × 30–45s" },
+    { name: "Hip CARs", scheme: "2 × 5/side" },
+    { name: "Cossack squats, bodyweight", scheme: "2 × 8/side" }
+  ],
+  "Spine / T-spine": [
+    { name: "Cat-cow", scheme: "2 × 10" },
+    { name: "Thread the needle", scheme: "2 × 6/side" },
+    { name: "Standing T-spine rotations", scheme: "2 × 10/side" },
+    { name: "Scorpion stretch", scheme: "2 × 6/side" }
+  ],
+  "Ankle": [
+    { name: "Ankle CARs", scheme: "2 × 8/side" },
+    { name: "Wall ankle dorsiflexion rocks", scheme: "2 × 12/side" },
+    { name: "Calf raise to stretch, slow tempo", scheme: "2 × 10" }
+  ]
+};
 
-const days = [
-  { label: "Sat", session: "push", points: 100 },
-  { label: "Sun", session: "pull", points: 100 },
-  { label: "Mon", session: "legs", points: 100 },
-  { label: "Tue", session: "core", points: 100 },
-  { label: "Wed", session: "skill", points: 100 },
-  { label: "Thu", session: "cardio_run", points: 300 },
-  { label: "Fri", session: "swim", points: 200 }
-];
+// ── 14-day cycle ─────────────────────────────────────────────────────
+// Each week is its own 7-day list. A day can have one or two session keys.
+const weeks = {
+  1: { label: "Parkrun week", days: [
+    { label: "Mon", keys: ["push"] },
+    { label: "Tue", keys: ["cardio_core"] },
+    { label: "Wed", keys: ["rest_mob"] },
+    { label: "Thu", keys: ["pull"] },
+    { label: "Fri", keys: ["rest_mob"] },
+    { label: "Sat", keys: ["parkrun", "legs_full"] },
+    { label: "Sun", keys: ["rest_recovery"] }
+  ]},
+  2: { label: "Fives week", days: [
+    { label: "Mon", keys: ["pull"] },
+    { label: "Tue", keys: ["push"] },
+    { label: "Wed", keys: ["rest_mob"] },
+    { label: "Thu", keys: ["legs_eff"] },
+    { label: "Fri", keys: ["cardio_core"] },
+    { label: "Sat", keys: ["rest_recovery"] },
+    { label: "Sun", keys: ["fives"] }
+  ]}
+};
 
-let ticked = [];
-let expanded = null;
+let currentWeek = 1;
+let expanded = null; // "week-dayIndex"
 
-function calculatePoints() {
-  let sum = 0;
-  for (const idx of ticked) {
-    if (days[idx]) sum += days[idx].points;
+// ── Persistence (localStorage) ───────────────────────────────────────
+// State shape: { ticks: { "1-0": true, ... }, firstTick: { "1": ms, "2": ms } }
+// Auto-reset: a week's ticks clear 7 days after that week's first tick.
+const STORE_KEY = "vitalityPillar.v1";
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+let ticked = new Set();
+let firstTick = {}; // week -> timestamp(ms) of first tick in current run
+
+function loadState() {
+  ticked = new Set();
+  firstTick = {};
+  let raw = null;
+  try { raw = localStorage.getItem(STORE_KEY); } catch (e) { return; }
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return; }
+  const now = Date.now();
+  const ft = data.firstTick || {};
+  const ticks = data.ticks || {};
+  // Determine which weeks have expired (7+ days since first tick).
+  const expired = {};
+  for (const wk in ft) {
+    if (ft[wk] && (now - ft[wk]) >= WEEK_MS) expired[wk] = true;
+    else firstTick[wk] = ft[wk];
   }
-  return sum;
+  for (const id in ticks) {
+    if (!ticks[id]) continue;
+    const wk = id.split("-")[0];
+    if (expired[wk]) continue; // drop expired week's ticks
+    ticked.add(id);
+  }
 }
 
-function updateRing() {
-  const points = calculatePoints();
-  const max = 900;
-  const ratio = Math.min(points / max, 1);
-  const circ = 2 * Math.PI * 25;
-  const fg = document.getElementById('ringFg');
-  const pts = document.getElementById('ringPts');
-  fg.style.strokeDashoffset = circ * (1 - ratio);
-  pts.textContent = points;
-  pts.classList.toggle('complete', points >= max);
+function saveState() {
+  const ticks = {};
+  ticked.forEach(id => { ticks[id] = true; });
+  const data = { ticks, firstTick };
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) {}
 }
 
-function toggleTick(idx) {
-  const i = ticked.indexOf(idx);
-  if (i > -1) ticked.splice(i, 1);
-  else ticked.push(idx);
+function setTick(id, on) {
+  const wk = id.split("-")[0];
+  if (on) {
+    ticked.add(id);
+    if (!firstTick[wk]) firstTick[wk] = Date.now(); // start 7-day window
+  } else {
+    ticked.delete(id);
+    const anyForWeek = [...ticked].some(t => t.split("-")[0] === wk);
+    if (!anyForWeek) delete firstTick[wk]; // week empty: clear window
+  }
+  saveState();
 }
 
-function buildDetail(session) {
-  let html = '<div class="detail-inner">';
-  if (session.exercises) {
-    html += '<div class="detail-label">Session</div>';
-    session.exercises.forEach((ex, i) => {
+function resetInfoHtml() {
+  const wk = String(currentWeek);
+  if (!firstTick[wk]) return "";
+  const resetAt = firstTick[wk] + WEEK_MS;
+  const days = Math.max(0, Math.ceil((resetAt - Date.now()) / (24 * 60 * 60 * 1000)));
+  const when = days === 0 ? "today" : days === 1 ? "in 1 day" : "in " + days + " days";
+  return "Resets " + when;
+}
+
+function buildSessionBlock(key) {
+  const s = sessions[key];
+  let html = '';
+  html += `<div class="detail-label">${s.title}${s.sub ? ' · ' + s.sub : ''}</div>`;
+  if (s.exercises) {
+    s.exercises.forEach((ex, i) => {
       html += `
         <div class="ex">
           <div class="ex-num rounded">${i + 1}</div>
@@ -429,75 +513,151 @@ function buildDetail(session) {
             ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
           </div>
           <div class="ex-scheme">${ex.scheme}</div>
-        </div>
-      `;
+        </div>`;
     });
   }
-  if (session.info) html += `<div class="info-pill">${session.info}</div>`;
-  html += '<div class="detail-label">Daily Mobility · 10 min</div>';
-  dailyMobility.forEach(item => {
-    html += `
-      <div class="ex">
-        <div class="ex-num"></div>
-        <div class="ex-body"><div class="ex-name">${item.name}</div></div>
-        <div class="ex-scheme">${item.scheme}</div>
-      </div>
-    `;
-  });
+  if (s.rule) html += `<div class="info-pill">${s.rule}</div>`;
+  if (s.info) html += `<div class="info-pill">${s.info}</div>`;
+  return html;
+}
+
+function buildGridMobility() {
+  let html = '<div class="detail-label">Grid Room Mobility · 20–25 min</div>';
+  html += '<div class="info-pill">Order: shoulder block first, hip and spine mid-session, ankle last.</div>';
+  for (const group in gridMobility) {
+    html += `<div class="detail-label" style="margin-top:12px">${group}</div>`;
+    gridMobility[group].forEach(item => {
+      html += `
+        <div class="ex">
+          <div class="ex-num"></div>
+          <div class="ex-body"><div class="ex-name">${item.name}</div></div>
+          <div class="ex-scheme">${item.scheme}</div>
+        </div>`;
+    });
+  }
+  return html;
+}
+
+function buildDetail(day) {
+  let html = '<div class="detail-inner">';
+  day.keys.forEach(k => { html += buildSessionBlock(k); });
+  // show full grid mobility list on rest/mobility days
+  if (day.keys.some(k => k === 'rest_mob')) html += buildGridMobility();
   html += '</div>';
   return html;
 }
 
+function dayTitleHtml(day) {
+  // Combine titles for multi-session days e.g. "Parkrun + Legs"
+  const titles = day.keys.map(k => sessions[k].title);
+  // de-dupe consecutive identical
+  const combined = [...new Set(titles)].join(' + ');
+  const first = sessions[day.keys[0]];
+  let cls = '';
+  if (first.event) cls = 'event';
+  else if (first.rest && day.keys.length === 1) cls = 'rest';
+  return `<span class="day-title ${cls}">${combined}</span>`;
+}
+
+function daySubHtml(day) {
+  // Use the first session's sub; for multi-session show first session's sub
+  return sessions[day.keys[0]].sub || '';
+}
+
 function render() {
+  const wk = weeks[currentWeek];
+  const reset = resetInfoHtml();
+  document.getElementById('weekLabel').textContent = wk.label + (reset ? " · " + reset : "");
   let html = '<div class="group">';
-  days.forEach((day, i) => {
-    const session = sessions[day.session];
-    const checked = ticked.includes(i);
-    const isExpanded = expanded === i;
-    const isLast = i === days.length - 1;
+  wk.days.forEach((day, i) => {
+    const id = currentWeek + "-" + i;
+    const checked = ticked.has(id);
+    const isExpanded = expanded === id;
+    const isLast = i === wk.days.length - 1;
+    const restClass = sessions[day.keys[0]].rest ? 'rest' : '';
     html += `
-      <div class="day-row ${isExpanded ? 'expanded' : ''} ${isLast ? 'last' : ''}" data-id="${i}">
-        <button class="tick ${checked ? 'checked' : ''}" data-tick="${i}" aria-label="Mark complete">
+      <div class="day-row ${isExpanded ? 'expanded' : ''} ${isLast ? 'last' : ''}" data-id="${id}">
+        <button class="tick ${checked ? 'checked' : ''} ${restClass}" data-tick="${id}" aria-label="Mark complete">
           ${CHECK_SVG}
         </button>
-        <div class="day-info" data-expand="${i}">
+        <div class="day-info" data-expand="${id}">
           <div class="day-line-1">
             <span class="day-label">${day.label}</span>
-            <span class="day-title">${session.title}</span>
+            ${dayTitleHtml(day)}
           </div>
-          <div class="day-sub">${session.sub}</div>
+          <div class="day-sub">${daySubHtml(day)}</div>
         </div>
-        <div class="day-meta" data-expand="${i}">
-          <span class="day-points ${checked ? 'earned' : ''}">${day.points}</span>
+        <div class="day-meta" data-expand="${id}">
           <span class="chevron">${CHEVRON_SVG}</span>
         </div>
       </div>
-      <div class="detail-wrap">${buildDetail(session)}</div>
-    `;
+      <div class="detail-wrap">${buildDetail(day)}</div>`;
   });
   html += '</div>';
   document.getElementById('content').innerHTML = html;
   attachHandlers();
-  updateRing();
 }
 
 function attachHandlers() {
   document.querySelectorAll('[data-tick]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();
-      toggleTick(parseInt(el.dataset.tick, 10));
+      const id = el.dataset.tick;
+      setTick(id, !ticked.has(id));
       render();
     });
   });
   document.querySelectorAll('[data-expand]').forEach(el => {
     el.addEventListener('click', () => {
-      const id = parseInt(el.dataset.expand, 10);
+      const id = el.dataset.expand;
       expanded = expanded === id ? null : id;
       render();
     });
   });
 }
 
+function switchWeek(wk) {
+  if (wk !== 1 && wk !== 2) return;
+  if (wk === currentWeek) return;
+  currentWeek = wk;
+  expanded = null;
+  document.querySelectorAll('.seg-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.week, 10) === wk);
+  });
+  document.getElementById('segThumb').classList.toggle('w2', wk === 2);
+  render();
+}
+
+document.querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchWeek(parseInt(btn.dataset.week, 10)));
+});
+
+// ── Swipe left/right to switch weeks ─────────────────────────────────
+(function () {
+  const surface = document.getElementById('content');
+  let startX = 0, startY = 0, tracking = false;
+  const THRESHOLD = 50;   // min horizontal px to count as a swipe
+  const V_TOLERANCE = 40; // max vertical drift allowed
+  surface.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) { tracking = false; return; }
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+  surface.addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    if (Math.abs(dx) < THRESHOLD) return;
+    if (Math.abs(dy) > Math.abs(dx) || Math.abs(dy) > V_TOLERANCE) return;
+    // swipe left → next week, swipe right → previous week
+    switchWeek(dx < 0 ? currentWeek + 1 : currentWeek - 1);
+  }, { passive: true });
+})();
+
+loadState();
 render();
 </script>
 </body>
