@@ -5,9 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="themeColor" content="#F2F2F7">
 <title>Vitality pillar</title>
+<script>
+// Resolve appearance before first paint so there is no light→dark flash.
+// Stored pref ('light'|'dark') wins; absent = follow system.
+(function () {
+  var pref = null;
+  try {
+    var t = localStorage.getItem("vitalityPillar.theme");
+    if (t === "light" || t === "dark") pref = t;
+  } catch (e) {}
+  if (pref) document.documentElement.setAttribute("data-theme", pref);
+  var dark = pref ? pref === "dark"
+    : !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var m = document.getElementById("themeColor");
+  if (m) m.setAttribute("content", dark ? "#000000" : "#F2F2F7");
+})();
+</script>
 <style>
   :root {
     color-scheme: light dark;
@@ -32,8 +47,33 @@
     --thumb-border: rgba(255, 255, 255, 0.65);
     --thumb-hi: rgba(255, 255, 255, 0.85);
   }
+  /* Dark palette — applied for an explicit dark override, OR when the
+     system is dark and the user hasn't overridden (no data-theme set). */
+  :root[data-theme="dark"],
+  :root.dark-vars {
+    --bg: #000000;
+    --card: #1C1C1E;
+    --separator: rgba(84, 84, 88, 0.65);
+    --text: #FFFFFF;
+    --text-secondary: rgba(235, 235, 245, 0.9);
+    --text-tertiary: rgba(235, 235, 245, 0.6);
+    --text-quaternary: rgba(235, 235, 245, 0.3);
+    --green: #30D158;
+    --green-dim: rgba(48, 209, 88, 0.16);
+    --teal: #40C8E0;
+    --orange: #FF9F0A;
+    --blue: #0A84FF;
+    --header-blur: rgba(10, 10, 10, 0.82);
+    --fill: rgba(118, 118, 128, 0.26);
+    --seg-bg: rgba(44, 44, 48, 0.55);
+    --seg-border: rgba(255, 255, 255, 0.14);
+    --seg-hi: rgba(255, 255, 255, 0.12);
+    --thumb-bg: rgba(255, 255, 255, 0.16);
+    --thumb-border: rgba(255, 255, 255, 0.28);
+    --thumb-hi: rgba(255, 255, 255, 0.3);
+  }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme]) {
       --bg: #000000;
       --card: #1C1C1E;
       --separator: rgba(84, 84, 88, 0.65);
@@ -84,7 +124,6 @@
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
-    border-bottom: 0.5px solid var(--separator);
   }
   .title-row {
     display: flex;
@@ -92,6 +131,57 @@
     justify-content: space-between;
     gap: 16px;
   }
+  /* ── Appearance toggle — mini liquid-glass segmented control ── */
+  .theme-seg {
+    display: flex;
+    position: relative;
+    flex-shrink: 0;
+    border-radius: 999px;
+    padding: 4px;
+    background: var(--seg-bg);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 0.5px solid var(--seg-border);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.16),
+      inset 0 1px 1px var(--seg-hi),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.08);
+  }
+  .theme-btn {
+    position: relative;
+    z-index: 1;
+    width: 38px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: 999px;
+    transition: color 0.3s ease;
+  }
+  .theme-btn.active { color: var(--text); }
+  .theme-btn svg { width: 17px; height: 17px; display: block; }
+  .theme-thumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: 38px;
+    border-radius: 999px;
+    background: var(--thumb-bg);
+    backdrop-filter: saturate(200%) blur(12px) brightness(1.1);
+    -webkit-backdrop-filter: saturate(200%) blur(12px) brightness(1.1);
+    border: 0.5px solid var(--thumb-border);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.16),
+      inset 0 1px 2px var(--thumb-hi),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.06);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .theme-thumb.dark { transform: translateX(38px); }
   h1 {
     font-size: 26px;
     font-weight: 700;
@@ -350,6 +440,20 @@
       <div>
         <h1>Vitality pillar</h1>
         <div class="week-label" id="weekLabel"></div>
+      </div>
+      <div class="theme-seg" role="group" aria-label="Appearance">
+        <div class="theme-thumb" id="themeThumb"></div>
+        <button class="theme-btn" data-theme-set="light" aria-label="Light mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2.5v2M12 19.5v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2.5 12h2M19.5 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <button class="theme-btn" data-theme-set="dark" aria-label="Dark mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 14.4A8 8 0 1 1 9.6 4 6.4 6.4 0 0 0 20 14.4z"/>
+          </svg>
+        </button>
       </div>
     </div>
   </header>
@@ -703,6 +807,48 @@ document.querySelectorAll('.seg-btn').forEach(btn => {
     switchWeek(dx < 0 ? currentWeek + 1 : currentWeek - 1);
   }, { passive: true });
 })();
+
+// ── Appearance toggle (light / dark; default = follow system) ────────
+// No stored pref → auto: variables driven by prefers-color-scheme, and the
+// thumb tracks live system changes. Tapping a side sets an explicit override.
+const THEME_KEY = "vitalityPillar.theme";
+function storedTheme() {
+  try { const t = localStorage.getItem(THEME_KEY); return (t === "light" || t === "dark") ? t : null; }
+  catch (e) { return null; }
+}
+// In-memory pref is the source of truth so the toggle works even where
+// localStorage is blocked (private mode, sandboxed preview, strict privacy).
+// Storage is best-effort persistence only — same pattern as the day ticks.
+let themePref = storedTheme(); // null = follow system
+function systemDark() {
+  return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function applyTheme() {
+  if (themePref) document.documentElement.setAttribute("data-theme", themePref);
+  else document.documentElement.removeAttribute("data-theme");
+  const dark = themePref ? themePref === "dark" : systemDark();
+  const thumb = document.getElementById("themeThumb");
+  if (thumb) thumb.classList.toggle("dark", dark);
+  document.querySelectorAll(".theme-btn").forEach(b => {
+    b.classList.toggle("active", (b.dataset.themeSet === "dark") === dark);
+  });
+  const m = document.getElementById("themeColor");
+  if (m) m.setAttribute("content", dark ? "#000000" : "#F2F2F7");
+}
+document.querySelectorAll(".theme-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    themePref = btn.dataset.themeSet;
+    try { localStorage.setItem(THEME_KEY, themePref); } catch (e) {}
+    applyTheme();
+  });
+});
+if (window.matchMedia) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  const onChange = () => { if (!themePref) applyTheme(); }; // only in auto mode
+  if (mq.addEventListener) mq.addEventListener("change", onChange);
+  else if (mq.addListener) mq.addListener(onChange);
+}
+applyTheme();
 
 loadState();
 render();
