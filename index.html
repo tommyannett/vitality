@@ -104,18 +104,23 @@
   }
   .seg-btn {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: none;
     background: transparent;
     color: var(--text);
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    padding: 13px 8px;
+    padding: 12px 8px;
     border-radius: 999px;
     cursor: pointer;
     z-index: 1;
     transition: color 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  }
+  .seg-btn svg {
+    width: 25px;
+    height: 25px;
+    display: block;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
   }
   .seg-btn.active { color: #007AFF; }
   .seg-thumb {
@@ -318,8 +323,25 @@
   <nav class="tabbar">
     <div class="seg">
       <div class="seg-thumb" id="segThumb"></div>
-      <button class="seg-btn active" data-week="1">Parkrun</button>
-      <button class="seg-btn" data-week="2">Fives</button>
+      <button class="seg-btn active" data-week="1" aria-label="Parkrun week">
+        <!-- parkrun tree: two overlapping canopy arcs, trunk, up-swept branch -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M12.28 9.01 A3.125 3.125 0 1 1 15.96 8.46"/>
+          <path d="M12 8.77 A3.375 3.375 0 1 0 11.58 14.82"/>
+          <path d="M13.5 11.1 L13.5 21"/>
+          <path d="M13.5 17.2 C13.5 16.2 14.4 14.85 17 14.85"/>
+        </svg>
+      </button>
+      <button class="seg-btn" data-week="2" aria-label="Fives week">
+        <!-- football: centre pentagon, spokes, hexagon panels, rim chords -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 15.1 L9.05 12.96 L10.18 9.49 L13.82 9.49 L14.95 12.96 Z"/>
+          <path d="M12 15.1 L12 17.7 M9.05 12.96 L6.58 13.76 M10.18 9.49 L8.65 7.39 M13.82 9.49 L15.35 7.39 M14.95 12.96 L17.42 13.76"/>
+          <path d="M9.22 20.56 L12 17.7 L14.78 20.56 M4.72 17.29 L6.58 13.76 L3 12 M4.72 6.71 L8.65 7.39 L9.22 3.44 M14.78 3.44 L15.35 7.39 L19.28 6.71 M21 12 L17.42 13.76 L19.28 17.29"/>
+          <path d="M9.22 3.44 L14.78 3.44 M19.28 6.71 L21 12 M19.28 17.29 L14.78 20.56 M9.22 20.56 L4.72 17.29 M3 12 L4.72 6.71"/>
+        </svg>
+      </button>
     </div>
   </nav>
 </div>
@@ -328,48 +350,50 @@ const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L1
 const CHEVRON_SVG = '<svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L6.5 6.5L1 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 // ── Session definitions ─────────────────────────────────────────────
+// Every gym visit = full body: the five patterns (push/dip, pull/pull-up,
+// overhead press, squat, hinge) + hanging leg raise. Three variations
+// (A/B/C) rotate the flavour of each pattern so back-to-back days and the
+// fives-freshness rule still work.
 const WEEKDAY_RULE = "3 heavy working sets per exercise · 2 min rest · in and out, no extras.";
+const FIVE_RULE = "Five patterns, every visit: dip · pull-up · overhead press · squat · hinge — plus the leg raise. Load up as the months go by; the muscle takes care of itself.";
 
 const sessions = {
-  push: { title: "Push", sub: "Chest, shoulders, triceps", rule: WEEKDAY_RULE, exercises: [
-    { name: "Machine chest press", scheme: "3 × 6–10" },
-    { name: "Machine shoulder press", scheme: "3 × 6–10" },
-    { name: "Lateral raise", scheme: "3 × 12–15" },
-    { name: "Reverse pec-deck", scheme: "3 × 12–15", note: "Rear delt" },
-    { name: "Triceps pushdown", scheme: "3 × 8–12" }
-  ]},
-  pull: { title: "Pull", sub: "Back, biceps, rear delt", rule: WEEKDAY_RULE, exercises: [
-    { name: "Weighted pull-up / lat pulldown", scheme: "3 × 6–10" },
-    { name: "Machine low row", scheme: "3 × 8–12", note: "Chest-supported" },
-    { name: "Cable pullover / 2nd vertical pull", scheme: "3 × 10–12" },
-    { name: "Biceps curl", scheme: "3 × 8–12" },
-    { name: "Face pull", scheme: "3 × 15" }
-  ], info: "Optional short L-sit / front-lever tuck block first if time allows. Flow: grid room (bar, mat) → parallel bars → cable area." },
-  legs_full: { title: "Legs", sub: "Full session · after easy parkrun", exercises: [
-    { name: "Leg press", scheme: "3 × 6–10", note: "Heavy, plus 1–2 ramp sets" },
-    { name: "Seated hamstring curl", scheme: "3 × 8–12" },
-    { name: "Glute kickback machine", scheme: "3 × 10–12" },
-    { name: "Calf raise", scheme: "3–4 × 10–15" },
-    { name: "Leg extension", scheme: "Conditional", note: "Only if back pain-free: light, partial ROM. Else skip." }
-  ], info: "Finish with hip and ankle mobility." },
-  legs_eff: { title: "Legs", sub: "Efficient session", rule: WEEKDAY_RULE, exercises: [
-    { name: "Leg press", scheme: "3 × 6–10", note: "Heavy" },
-    { name: "Seated hamstring curl", scheme: "3 × 8–12" },
-    { name: "Glute kickback machine", scheme: "3 × 10–12" },
-    { name: "Calf raise", scheme: "3 × 10–15" }
-  ]},
-  cardio_core: { title: "Cardio + Core", sub: "Zone 2 + lower core", exercises: [
-    { name: "Hanging leg raise", scheme: "3 sets" },
+  fullA: { title: "Full Body A", sub: "Heavy barbell — squat + RDL", rule: WEEKDAY_RULE, exercises: [
+    { name: "Dip", scheme: "3 × 6–10", note: "Bodyweight until easy, then add plates on a belt" },
+    { name: "Pull-up", scheme: "3 × 6–10", note: "Own 10 clean reps before adding weight" },
+    { name: "Standing barbell overhead press", scheme: "3 × 6–10", note: "Full lockout, control back down to the chin" },
+    { name: "Back squat", scheme: "3 × 6–10", note: "All the way into the hole — no quarter reps" },
+    { name: "Romanian deadlift", scheme: "3 × 8–12", note: "Slow — long stretch through the hamstrings" },
+    { name: "Hanging leg raise", scheme: "3 × 8–12", note: "No swinging. Knees up → straight legs as you get stronger" }
+  ], info: FIVE_RULE + " <strong>Back playing up?</strong> Goblet squat instead of back squat, hip thrust instead of RDL." },
+  fullB: { title: "Full Body B", sub: "Dumbbell variations — legs kept light", rule: WEEKDAY_RULE, exercises: [
+    { name: "Dip, upright torso", scheme: "3 × 8–12", note: "Sit up tall — triceps bias" },
+    { name: "Chin-up", scheme: "3 × 6–10", note: "Underhand — biceps do more of the work" },
+    { name: "Seated dumbbell press", scheme: "3 × 8–12", note: "Deeper bottom stretch; exposes the weaker side" },
+    { name: "Goblet squat", scheme: "3 × 10–12", note: "Deliberately lighter — this day sits next to A" },
+    { name: "Hip thrust", scheme: "3 × 8–12", note: "The hinge caught at the top — glutes" },
+    { name: "Hanging leg raise", scheme: "3 × 8–12", note: "No swinging" }
+  ], info: "Lower body is intentionally light here — the heavy squat and hinge live on A and C." },
+  fullC: { title: "Full Body C", sub: "Unilateral + heavy deadlift", rule: WEEKDAY_RULE, exercises: [
+    { name: "Dip, forward lean", scheme: "3 × 6–10", note: "Lean into it — chest bias" },
+    { name: "Wide-grip pull-up", scheme: "3 × 6–10", note: "Lats stretched long at the bottom — that's the money" },
+    { name: "Single-arm dumbbell press", scheme: "3 × 8–10 /side", note: "Core fights the twist — anti-rotation" },
+    { name: "Bulgarian split squat", scheme: "3 × 8–10 /side", note: "Same pattern, different flavour of suffering" },
+    { name: "Deadlift", scheme: "3 × 5–8", note: "Heavy. The oldest test of strength there is" },
+    { name: "Hanging leg raise", scheme: "3 × 8–12", note: "No swinging" }
+  ], info: "<strong>Back playing up?</strong> Keep the deadlift light or swap for hip thrust." },
+  cardio_core: { title: "Cardio + Core", sub: "Zone 2 + core stability", exercises: [
     { name: "L-sit progression", scheme: "3 sets" },
     { name: "Pallof press", scheme: "3 sets" },
-    { name: "Hollow hold", scheme: "3 sets" }
-  ], info: "<strong>Cardio:</strong> 25–35 min steady Zone 2 — bike, swim, or treadmill. Alternate modality between the two Cardio+Core sessions across the cycle." },
-  parkrun: { title: "Parkrun", sub: "Easy effort, then full Legs", event: true,
-    info: "Run easy — this is the warm-up for legs, not a PB attempt. Legs session follows (see below). Legs cannot precede parkrun, so this order is fixed." },
+    { name: "Hollow hold", scheme: "3 sets" },
+    { name: "Side plank", scheme: "3 sets" }
+  ], info: "<strong>Cardio:</strong> 25–35 min steady Zone 2 — bike, swim, or treadmill. Alternate modality between the two Cardio+Core sessions across the cycle. Leg raises live on lifting days now, so this is the stability work." },
+  parkrun: { title: "Parkrun", sub: "Easy effort, then Full Body C", event: true,
+    info: "Run easy — this is the warm-up for the lifting, not a PB attempt. Full Body C follows (see below). Lifting cannot precede parkrun, so this order is fixed." },
   fives: { title: "Fives", sub: "Football", event: true,
-    info: "Legs kept clear for 3 days before (Thu legs → Sun fives) to protect freshness. If fives feels compromised by Thu legs, fallback is moving legs to Mon Wk2." },
+    info: "Heavy lower work kept 3 days clear (Thu Full Body C → Sun fives) to protect freshness, and Tue's session keeps the legs light. If fives still feels compromised, fallback is dropping the Thu deadlift that week." },
   rest_mob: { title: "Rest / mobility", sub: "Mobility 15–25 min + easy walk", rest: true,
-    info: "Mobility 15–25 min, easy walk. Handstand wall holds optional, low load. See grid-room mobility list below." },
+    info: "Mobility 15–25 min, easy walk. Handstand wall holds optional, low load — the purest overhead press there is. See grid-room mobility list below." },
   rest_recovery: { title: "Rest + recovery", sub: "Recovery stack day", rest: true,
     info: "<strong>Recovery stack, in order:</strong> foam roll → stretch → spa bath → cold plunge. Only on full rest/recovery days, never after a heavy training day." }
 };
@@ -407,19 +431,19 @@ const gridMobility = {
 // Each week is its own 7-day list. A day can have one or two session keys.
 const weeks = {
   1: { label: "Parkrun week", days: [
-    { label: "Mon", keys: ["push"] },
+    { label: "Mon", keys: ["fullA"] },
     { label: "Tue", keys: ["cardio_core"] },
     { label: "Wed", keys: ["rest_mob"] },
-    { label: "Thu", keys: ["pull"] },
+    { label: "Thu", keys: ["fullB"] },
     { label: "Fri", keys: ["rest_mob"] },
-    { label: "Sat", keys: ["parkrun", "legs_full"] },
+    { label: "Sat", keys: ["parkrun", "fullC"] },
     { label: "Sun", keys: ["rest_recovery"] }
   ]},
   2: { label: "Fives week", days: [
-    { label: "Mon", keys: ["pull"] },
-    { label: "Tue", keys: ["push"] },
+    { label: "Mon", keys: ["fullA"] },
+    { label: "Tue", keys: ["fullB"] },
     { label: "Wed", keys: ["rest_mob"] },
-    { label: "Thu", keys: ["legs_eff"] },
+    { label: "Thu", keys: ["fullC"] },
     { label: "Fri", keys: ["cardio_core"] },
     { label: "Sat", keys: ["rest_recovery"] },
     { label: "Sun", keys: ["fives"] }
@@ -433,7 +457,7 @@ let expanded = null; // "week-dayIndex"
 // State shape: { weekKey: "YYYY-MM-DD", ticks: { "1-0": true, ... } }
 // Auto-reset: all ticks clear at local Monday 00:00. weekKey = date of the
 // Monday starting the current week; on load, a mismatch wipes the ticks.
-const STORE_KEY = "vitalityPillar.v2";
+const STORE_KEY = "vitalityPillar.v3";
 let ticked = new Set();
 
 // Date (local) of the Monday at 00:00 that starts the week containing `d`.
@@ -536,7 +560,7 @@ function buildDetail(day) {
 }
 
 function dayTitleHtml(day) {
-  // Combine titles for multi-session days e.g. "Parkrun + Legs"
+  // Combine titles for multi-session days e.g. "Parkrun + Full Body C"
   const titles = day.keys.map(k => sessions[k].title);
   // de-dupe consecutive identical
   const combined = [...new Set(titles)].join(' + ');
